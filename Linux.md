@@ -63,6 +63,11 @@ ls -la  # lists long foramted hidden files
 ls -lah # long format + hidden + human readable
 ```
 
+```bash
+lsof <file>
+# shows which process has opened <file>
+```
+
 
 ### `cd` (Change directory)
 
@@ -239,6 +244,10 @@ tail -f /var/log/syslog
 
 cat /var/log/syslog | grep ssh 
 # print logs with filer for specific service, here ssh
+
+lsof <file>
+# shows which process has opened <file>
+=
 ```
 ---
 
