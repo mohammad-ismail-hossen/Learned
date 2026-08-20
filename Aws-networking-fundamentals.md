@@ -55,7 +55,7 @@ A subnet is a smaller, isolated section of a larger network.
 
 ### CIDR (Classless Inter-Domain Routing )
 
-CIDR notation defines how large a network is.
+CIDR notation defines how large a network is. A CIDR block divides a giant network into smaller, specific IP ranges so that we can hand them out efficiently without wasting any addresses.
 
 ```
 10.0.0.0/16
