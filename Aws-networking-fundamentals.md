@@ -61,7 +61,19 @@ CIDR notation defines how large a network is. A CIDR block divides a giant netwo
 10.0.0.0/16
 ```
 
-The number after the `/` controls size:
+<details><summary>ipv4 address?</summary>
+
+An IPv4 address is a 32-bit address (bit:0,1). 
+
+Example: 11000000101010000000000100000001
+
+Four octets: This 32 bits are divided into four groups of 8 bits, which are called octets. And every octet is a decimal number between 0-255 because 2⁸ = 256. So the decimal representation of the given example is: 192.168.1.1 which is familiar :)
+
+The total number of ipv4 adress is 2³² = 4,294,967,296 ; rougly 4 billion.
+
+</details>
+
+The number after `/` is called prefix length. It controls size:
 
 | CIDR | Network Size |
 |------|-------------|
@@ -70,6 +82,41 @@ The number after the `/` controls size:
 | `/32` | Single IP address |
 
 > **smaller number = bigger network**.
+
+
+<details><summary>Prefix length math?</summary>
+
+In `10.0.0.0/24`:
+
+10.0.0.0 is the network address. /24 is the prefix. It means the first 24 bits (3 octets) are used for the network portion (network prefix) and remaining 8 bits (last octet) are available for addresses within that network (host bits).
+
+Because IPv4 has 32 bits:
+
+32 - 24 = 8 host bits
+
+2⁸ = 256 addresses
+
+For an IPv4 CIDR block:
+
+Total addresses = 2^(32 - prefix length)
+
+For /24:
+
+2^(32 - 24)
+= 2⁸
+= 256 addresses
+
+Because for /24 there is left only one octet, and we know one octed in decimal value is upto 256
+
+For /32:
+
+2^(32-32)
+= 2⁰
+= 1 address
+
+So, for 192.168.0.104/32 all of it is network prefix, and none of it is host bits. Thats why the whole address is just one address~ 
+
+</details>
 
 ---
 
@@ -80,19 +127,6 @@ DNS translates human-readable names into IP addresses that computers use.
 ```
 google.com  to  142.250.80.46
 ```
-
-
-
----
-
-### HTTP vs. HTTPS
-
-| Protocol | What it is |
-|----------|-----------|
-| HTTP | Regular web traffic (unencrypted) |
-| HTTPS | Encrypted web traffic (HTTP + TLS) |
-
-Modern applications use HTTPS because with HTTP anyone between user and the server can read traffic.
 
 ---
 
@@ -107,6 +141,17 @@ A port is a specific entry point on a server.
 | 22 | SSH (remote terminal access) |
 
 > Metaphor: **IP address = apartment building**, **port = individual apartment door**.
+
+<details><summary>HTTP vs HTTPS</summary>
+
+| Protocol | What it is |
+|----------|-----------|
+| HTTP | Regular web traffic (unencrypted) |
+| HTTPS | Encrypted web traffic (HTTP + TLS) |
+
+Modern applications use HTTPS because with HTTP anyone between user and the server can read traffic.
+
+</details>
 
 ---
 
@@ -128,30 +173,27 @@ A firewall decides what traffic is allowed in or out of a network or server.
 
 | Layer | Name | Key concepts |
 |-------|------|--------------|
-| **1** | Physical | Cables, Wi-Fi signals |
+| **1** | Physical layer | Cables, Wi-Fi signals |
 | **2** | Data Link | Local network (MAC addresses, switches) |
-| **3** | Network | IP addresses, routing |
-| **4** | Transport | TCP/UDP, ports |
+| **3** | Network layer | IP addresses, routing |
+| **4** | Transport layer | TCP/UDP protocols, ports |
 | **5–6** | Session & Presentation | Session management, encoding |
-| **7** | Application | Actual data contents (HTTP/HTTPS,  URLs, headers, cookies) |
+| **7** | Application layer | Actual data contents (HTTP/HTTPS,  URLs, headers, cookies) |
 
 
 #### Layer 3: Network (IP & Routing)
-- "Where" a packet is going
-- Key question: "What's the destination IP?"
+- `Where` a packet is going?
 - AWS services: Route Tables, Internet Gateway (IGW), NAT Gateway, VPC, NACLs, Gateway load balancer (GLB)
 
 #### Layer 4: Transport (TCP/UDP + Ports)
-- "how" data can be delivered reliably
-- TCP = connection-oriented (checks before sending), reliable (e.g., HTTPS on port 443)
+- `How` data is being delivered?
+- TCP = connection-oriented (checks before sending), reliable (e.g. HTTPS on port 443)
 - UDP = connectionless (throws data), faster (e.g., DNS on port 53)
 - AWS services: Security Groups, Network load balancer (NLB)
 
 #### Layer 7: Application (HTTP/HTTPS + Content)
-- "what" is being sent (the content)
-- Aware of URLs, paths (`/api/users`), headers, cookies, hostnames
+- `What` is being sent?
 - AWS services: Application load balancer (ALB) (path/host-based routing), WAF, CloudFront, API Gateway
-
 
 ---
 
@@ -159,7 +201,7 @@ A firewall decides what traffic is allowed in or out of a network or server.
 
 ### VPC (Virtual Private Cloud)
 
-A VPC is a private, isolated network inside AWS.
+A VPC is a private, isolated network inside AWS. Inside a VPC we can control: IP ranges, subnets, routing and security rules.
 
 ```
 AWS Account
@@ -169,8 +211,7 @@ AWS Account
       └── Your resources (EC2, RDS, etc.)
 ```
 
-Inside a VPC we can control: IP ranges, subnets, routing and security rules.
-
+A VPC exists within one Region and can span across multiple Availability Zones in that Region. The subnets spans across the AZ's. Note that a subnet belongs to one AZ it can't be multiple, where an AZ can have multiple subnets.
 
 ```
 Region
@@ -180,13 +221,11 @@ Region
     └── Subnet C (AZ-c)
 ```
 
-A VPC exists within one Region and can span across multiple Availability Zones in that Region. The subnets from it, spans across the AZ's. A subnet belongs to exactly one AZ but an AZ can have multiple subnets.
-
-For EFS file system in aws: (it's just a network file system)
+For EFS (Elastic file system) in aws:
 
 ```
 
-          EFS (One regional file system)----vpc/region bound
+          _________EFS___________ ----------vpc/region bound
          /          |            \
  Mount A         Mount B       Mount C------subnet/AZ bound
  (AZ-a)          (AZ-b)        (AZ-c)-------|
@@ -196,14 +235,12 @@ For EFS file system in aws: (it's just a network file system)
 ``` 
 EFS are VPC bound where mount targets are subnet bound.
 
-The meaning: EFS  exists inside a VPC. Where the mount targets(doors) for that EFS , are inside subnets(of this vpc) in different AZ's. So data never travels between az's, it directly goes to EFS.
+EFS exists inside VPC and where the mount targets (doors) exist in subnets. So data directly goes from subnets to efs, it never travels between AZ's because subnets are AZ bound and VPC is region bound.
 
 
 ---
 
 ### Public & Private Subnets
-
-This is the most fundamental architectural pattern in AWS.
 
 **Public subnet** - connected to the internet via an Internet Gateway. Holds anything that needs to be publicly reachable (load balancers, public servers).
 
@@ -214,14 +251,14 @@ A typical real-world architecture:
 ```
 Internet
    ↓
-Load Balancer        - Public Subnet
+Load Balancer--------- Public Subnet
    ↓
-Application Server   - could be public or private
+Application Server---- could be public or private
    ↓
-Database             - Private Subnet
+Database-------------- Private Subnet
 ```
 
-Users hit the load balancer, the load balancer sends traffic to the app and the app talks to the database. The database is not directly reached from outside.
+Traffic goes to load balancer, the load balancer sends traffic to the app and the app works with the database. The database is not directly reached from outside.
 
 ---
 
@@ -229,14 +266,7 @@ Users hit the load balancer, the load balancer sends traffic to the app and the 
 
 ### IGW (Internet Gateway)
 
-An Internet Gateway is a 1:1 bi-directional bridge.
-
-| Direction | Allowed? |
-|-----------|---------|
-| Private server → Internet | Yes |
-| Internet → Private server | Yes |
-
-The Internet Gateway is the door between VPC and the internet. Without it a VPC can't reach the public internet, and nothing outside can reach in.
+An Internet Gateway is a 1:1 bi-directional bridge for vpc and internet. It allows the vpc to be connected to the internet.
 
 ```
 VPC  ←→  Internet Gateway  ←→  Internet
@@ -248,34 +278,34 @@ A public subnet is "public" precisely because its route table points to an IGW.
 
 ### NAT Gateway
 
-A NAT Gateway is a oneway valve for a private server. When a private server needs to reach the internet (e.g., downloading software updates) we use nat gateway. It ensures that no one from outside can reach the server, but the server can reach outside.
-
-NAT Gateway sits in a public subnet and acts as a middleman.
+A NAT Gateway is a oneway valve for a private server. When a private server needs to reach the internet (e.g., downloading software updates) we use nat gateway.
 
 | Direction | Allowed? |
 |-----------|---------|
 | Private server → Internet | Yes |
 | Internet → Private server | No |
 
-The private server's requests go out through the NAT Gateway and esponses come back through it too. But no one outside can initiate a connection in.
+Only the private server's initiated requests can go out, and come back in. So, ouside traffic can't initiate connection.
 
-> Metaphor: a one-way valve. Traffic can flow out, but nothing gets in uninvited.
+> Metaphor: a one-way valve. Traffic can flow out, but not in.
 
 ---
 
 ### Route Tables
 
-A route table is a set of rules that tells traffic where to go. Every subnet has one.
+A route table is a set of rules that tells traffic where to go.
 
 Example rule:
+
+To make a subnet public, we route traffic to IGW.
 
 ```
 0.0.0.0/0  →  Internet Gateway
 ```
 
-This means: "send all traffic coming from the internet through the IGW." This makes a subnet public.
+This means: "send all traffic coming from the internet through the IGW."
 
-Private subnets have route tables that don't point to an IGW. So, they can't be reached from the internet directly.
+Private subnets route tables don't point to an IGW. That's why they can't be reached from the internet directly.
 
 ---
 
@@ -283,17 +313,21 @@ Private subnets have route tables that don't point to an IGW. So, they can't be 
 
 ### Security Groups
 
-Security Groups are the primary firewall in AWS, applied at the **instance level** (per EC2 instance, RDS instance, etc.).
+Security Groups are the primary firewall in AWS. Applied at the instance level (EC2 instance, RDS instance, etc.).
 
-You define rules like:
+We define rules like:
 
-```
+```bash
 Inbound:
-  Allow port 443 from anywhere       (HTTPS traffic in)
-  Allow port 22 from 203.0.113.5     (SSH from 203.0.113.5 IP only)
+Allow port 443 from 0.0.0.0/0
+# HTTPS traffic from
+
+Allow port 22 from 203.0.113.5
+# SSH from only 203.0.113.5 ip
 
 Outbound:
-  Allow all traffic                  (default)
+Allow all traffic
+# default
 ```
 
 **Key concept - Stateful:**
@@ -312,7 +346,7 @@ NACLs are an additional firewall layer, but they operate at the **subnet level**
 
 NACLs don't track connection state. If you allow inbound traffic, you must also explicitly allow the return traffic outbound. Both directions need rules.
 
-> Metaphor: a less smart bouncer who doesn't remembers faces. He has to be told who to let in and also who to let out.
+> Metaphor: a less smart bouncer who doesn't remember faces. He has to be told who to let in and also who to let out.
 
 **Security Groups vs. NACLs at a glance:**
 
@@ -325,13 +359,13 @@ NACLs don't track connection state. If you allow inbound traffic, you must also 
 | Primary use | Main firewall | Extra subnet-level filter |
 | Rule evaluation | All rules checked | Rules checked in number order |
 
-For most use cases, Security Groups alone are sufficient. NACLs are an extra layer for stricter environments.
+For most cases, Security Groups are sufficient. NACLs are an extra layer for stricter environments.
 
 ---
 
 ### Load Balancer
 
-A Load Balancer sits in front and distributes incoming traffic across multiple instances.
+A Load Balancer creates a single endpoint for the users and distributes incoming traffic across multiple instances.
 
 ```
 10,000 users
@@ -419,7 +453,7 @@ This is a standard 3-tier architecture.
 | Private IP | Only reachable inside a private network |
 | DNS | Translates domain names to IP addresses |
 | Port | A specific entry point on a server (80=HTTP, 443=HTTPS, 22=SSH) |
-| CIDR | Defines network size, smaller number = bigger network |
+| CIDR | Defines network size |
 | Routing | Rules that decide where traffic is sent |
 | Firewall | Gatekeeper that controls what traffic is allowed |
 
@@ -437,22 +471,6 @@ This is a standard 3-tier architecture.
 | NACL | Subnet-level firewall - stateless |
 | Load Balancer | Distributes traffic across multiple servers |
 
-### Key Comparisons
-
-| | Security Group | NACL |
-|-|---------------|------|
-| Level | Instance | Subnet |
-| State | Stateful | Stateless |
-| Direction | Inbound + outbound | Both must be set manually |
-| Use | Always | Extra hardening |
-
-| | Internet Gateway | NAT Gateway |
-|-|-----------------|-------------|
-| Purpose | Connects VPC to internet | Lets private servers reach internet |
-| Inbound allowed? | Yes | No |
-| Lives in | VPC-level | Public subnet |
-| Used by | Public subnets | Private subnets |
-
 ### Common Port Numbers
 
 | Port | Protocol | Used for |
@@ -462,14 +480,3 @@ This is a standard 3-tier architecture.
 | 443 | HTTPS | Encrypted web traffic |
 | 3306 | MySQL | Database connections |
 | 5432 | PostgreSQL | Database connections |
-
-### CIDR Quick Reference
-
-| CIDR | Approx. Addresses | Use case |
-|------|-------------------|---------|
-| `/16` | 65,536 | Large VPC |
-| `/24` | 256 | Typical subnet |
-| `/28` | 16 | Small subnet |
-| `/32` | 1 | Single IP |
-
----

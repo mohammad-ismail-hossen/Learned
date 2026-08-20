@@ -7,7 +7,7 @@
 3. [Git Branching](#3-branching-in-git)
 4. [Remote Repository](#4-remote-repository)
 5. [.gitignore](#5-gitignore)
-6. [Reverting or Resetting Changes](#6-reverting-or-resetting-changes)
+6. [Reverting or Resetting Changes](#6-reverting-or-resetting)
 7. [Git Log & History](#7-git-log--history)
 8. [Conventional Commits](#8-conventional-commits)
 9. [Merge Conflicts](#9-merge-conflicts)
